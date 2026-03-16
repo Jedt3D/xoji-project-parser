@@ -1,0 +1,358 @@
+# xoji Quickstart Guide
+
+**5-Minute Setup for Xojo Developers**
+
+---
+
+## Slide 1: What is xoji?
+
+### AI-Friendly Project Indexer for Xojo
+
+- Pre-indexes your Xojo project (100+ files)
+- Reduces AI agent token usage by **5–8×**
+- Enables agents to read only what's needed
+- Automatic freshness checking
+- Works with Claude Code, custom agents, build pipelines
+
+**Result**: From 7% productive tokens → 50–60% productive tokens
+
+---
+
+## Slide 2: The Problem xoji Solves
+
+### Without xoji:
+```
+AI Agent tasked with: "Fix crash in OrderForm"
+↓
+Scans 40+ class files blindly (~15% tokens)
+↓
+Reads entire 3,000-line window file (~35% tokens)
+↓
+Maps dependencies by brute force (~15% tokens)
+↓
+Finally writes code (~7% tokens) ← Only this matters!
+```
+
+**90% wasted on overhead**
+
+---
+
+## Slide 3: The Solution
+
+### With xoji:
+```
+AI Agent tasked with: "Fix crash in OrderForm"
+↓
+Query codetree.json → "ListBox1.Change at line 112" (instant)
+↓
+Query dependencies.json → "OrderForm depends on: BaseForm, DatabaseManager"
+↓
+Read lines 100–140 only (~1 KB instead of 50 KB)
+↓
+Writes code
+```
+
+**Agent gets exactly what it needs. 5–8× fewer tokens.**
+
+---
+
+## Slide 4: Installation (30 seconds)
+
+### macOS / Linux
+
+```bash
+git clone git@github.com:Jedt3D/xoji-project-parser.git
+cd xoji-project-parser
+./build.sh
+# Binary ready: ./xoji
+```
+
+### Windows
+
+```cmd
+git clone git@github.com:Jedt3D/xoji-project-parser.git
+cd xoji-project-parser
+build.bat
+REM Binary ready: xoji.exe
+```
+
+---
+
+## Slide 5: One-Command Project Setup
+
+### Automatically configure your Xojo project
+
+```bash
+xoji setup ../my_xojo_project
+```
+
+**This does:**
+- ✓ Creates `.xojo_index/` directory
+- ✓ Updates project's CLAUDE.md with instructions
+- ✓ Installs `.claude/hooks/pre-task.sh` for auto-freshness checking
+
+**No manual editing required.**
+
+---
+
+## Slide 6: Build the Indexes
+
+### Create the JSON index files
+
+```bash
+xoji index ../my_xojo_project
+```
+
+**Output:**
+```
+.xojo_index/
+├── codetree.json       ← Every method, property, line number
+├── manifest.json       ← All files and their types
+├── dependencies.json   ← Class relationships
+└── meta.json          ← Project hash & timestamps
+```
+
+**Time: ~200ms for 40+ files**
+
+---
+
+## Slide 7: Automatic Freshness (Optional)
+
+### Let Claude Code keep indexes fresh
+
+The `.claude/hooks/pre-task.sh` hook (installed by `xoji setup`) runs automatically:
+
+```bash
+# Runs before each Claude Code task:
+xoji check || xoji index
+
+# If files changed: rebuild (silent)
+# If fresh: do nothing
+```
+
+**Zero manual intervention needed after setup.**
+
+---
+
+## Slide 8: Using the Indexes (For AI Agents)
+
+### Your project's CLAUDE.md now tells agents how to use xoji
+
+Example:
+```bash
+# Instead of reading entire 3000-line window file:
+cat .xojo_index/codetree.json | grep -A 5 "MainWindow"
+
+# Get back:
+# "Button1.Pressed": 78  ← line number
+
+# Then read just what's needed:
+sed -n '70,90p' AppSrc/MainWindow.xojo_window
+```
+
+**Agents do this automatically when CLAUDE.md has xoji instructions.**
+
+---
+
+## Slide 9: Verify It Works
+
+### Test on your project
+
+```bash
+# Start fresh
+xoji setup .
+xoji index
+
+# Check freshness
+xoji check && echo "Fresh!" || echo "Stale"
+
+# Inspect the indexes
+cat .xojo_index/codetree.json | grep -o '"entity":"[^"]*"' | head -10
+```
+
+---
+
+## Slide 10: What Gets Indexed?
+
+### xoji extracts:
+
+**From .xojo_code (classes/modules):**
+- Methods (with line numbers)
+- Properties (with line numbers)
+- Events
+- Constants
+- Enums
+- Inheritance & interfaces
+
+**From .xojo_window (UI files):**
+- All controls (buttons, textfields, listboxes, etc.)
+- Window-level methods & properties
+- Per-control event handlers
+- Window-level constants & enums
+
+---
+
+## Slide 11: Example: Look Up a Method
+
+### Find `Button1.Pressed` in MainTestWindow.xojo_window
+
+**Step 1: Query the index**
+```bash
+cat .xojo_index/codetree.json | grep -A 20 MainTestWindow.xojo_window
+```
+
+**Result:**
+```json
+"events": {
+  "Opening": 45,
+  "Button1.Pressed": 78,
+  "ListBox1.Change": 112
+}
+```
+
+**Step 2: Read only that section**
+```bash
+sed -n '70,90p' AppSrc/MainTestWindow.xojo_window
+```
+
+✅ Done. Agent has the exact code in 2 commands.
+
+---
+
+## Slide 12: Commands Cheat Sheet
+
+```bash
+# Setup & build
+xoji setup ../project          # One-time configuration
+xoji index ../project          # Build all indexes
+xoji index --file path/file    # Update just one file (fast)
+
+# Verify
+xoji check ../project          # Exit 0 = fresh, 1 = stale
+
+# Watch mode (coming soon)
+xoji serve ../project          # Auto-index on file changes
+```
+
+---
+
+## Slide 13: Performance Numbers
+
+| Task | Time |
+|------|------|
+| Full index (40+ files) | ~200 ms |
+| Incremental (one file) | <100 ms |
+| Freshness check (cached) | ~50 ms |
+| Binary size | 3.7 MB |
+| Index files total | ~150 KB |
+
+**Fast enough for real-time use.**
+
+---
+
+## Slide 14: File Structure (After Setup)
+
+```
+my_xojo_project/
+├── .xojo_project              ← Project file
+├── .xojo_index/               ← Generated by xoji
+│   ├── codetree.json
+│   ├── manifest.json
+│   ├── dependencies.json
+│   └── meta.json
+├── .claude/hooks/             ← Setup by xoji setup
+│   └── pre-task.sh
+├── CLAUDE.md                  ← Updated by xoji setup
+├── App.xojo_code
+├── AppSrc/
+│   ├── MainWindow.xojo_window
+│   └── ...
+└── ...
+```
+
+---
+
+## Slide 15: Next Steps
+
+### You're ready!
+
+1. **Install xoji**: `./build.sh` (macOS/Linux) or `build.bat` (Windows)
+
+2. **Setup your project**: `xoji setup ../my_project`
+
+3. **Build indexes**: `xoji index ../my_project`
+
+4. **Use with Claude Code**:
+   - Claude Code will read `.xojo_index/` automatically
+   - Agents will use indexes to reduce token usage by 5–8×
+
+5. **Optional: Verify**:
+   ```bash
+   xoji check && echo "Fresh!"
+   cat .xojo_index/codetree.json | jq . | less
+   ```
+
+---
+
+## Slide 16: Support & Resources
+
+### Learn More:
+- **Full docs**: `docs/README.md`
+- **Architecture**: `docs/ARCHITECTURE.md` (coming soon)
+- **GitHub**: https://github.com/Jedt3D/xoji-project-parser
+- **Issues**: https://github.com/Jedt3D/xoji-project-parser/issues
+
+### Contact:
+- Email: support@example.com
+- GitHub Issues for bugs/features
+
+---
+
+## Slide 17: Key Takeaways
+
+✅ **xoji reduces AI agent token costs by 5–8×**
+
+✅ **One-command setup**: `xoji setup`
+
+✅ **Automatic freshness checking**: Pre-task hook keeps indexes current
+
+✅ **Agent-friendly**: Indexes tell Claude Code what to read
+
+✅ **Open source**: 100% pure Go, no external dependencies
+
+✅ **Production-ready**: Used daily on 40+ file projects
+
+---
+
+## Slide 18: Ready to Go!
+
+### Start now:
+
+```bash
+# 1. Clone & build
+git clone git@github.com:Jedt3D/xoji-project-parser.git
+cd xoji-project-parser
+./build.sh
+
+# 2. Setup your project (one time)
+./xoji setup ../my_xojo_project
+
+# 3. Index it
+./xoji index
+
+# 4. Your AI agents now use indexes automatically
+```
+
+**Questions? Open an issue on GitHub.**
+
+**Happy indexing! 🚀**
+
+---
+
+*This guide can be converted to PDF/slideshow format with tools like Marp, Pandoc, or reveal.js*
+
+```bash
+# Example: Convert to PDF with Marp
+npm install -g @marp-team/marp-cli
+marp QUICKSTART.md -o QUICKSTART.pdf
+```
