@@ -7,7 +7,8 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$SCRIPT_DIR/src"
 DIST_DIR="$SCRIPT_DIR/dist"
-VERSION="1.0.0"
+# Version is sourced from src/version.go
+VERSION=$(grep 'const Version = ' "$SRC_DIR/version.go" | sed 's/.*"\([^"]*\)".*/\1/')
 
 echo "Building xoji v$VERSION..."
 mkdir -p "$DIST_DIR"

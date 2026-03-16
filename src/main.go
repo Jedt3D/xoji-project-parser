@@ -27,7 +27,7 @@ func main() {
 		printUsage()
 		os.Exit(0)
 	case "-v", "--version", "version":
-		fmt.Println("xoji v1.0.0 - AI-Friendly Xojo Project Indexer")
+		fmt.Printf("xoji v%s - AI-Friendly Xojo Project Indexer\n", Version)
 		os.Exit(0)
 	default:
 		fmt.Printf("Error: Unknown command '%s'\n\n", cmd)
@@ -37,8 +37,10 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Println(`xoji v1.0.0 - AI-Friendly Xojo Project Indexer
+	fmt.Printf(`xoji v%s - AI-Friendly Xojo Project Indexer
 Reduce AI agent token costs by 5-8x on large Xojo projects (100+ files)
+`, Version)
+	fmt.Print(`
 
 USAGE:
   xoji <command> [options] [path]

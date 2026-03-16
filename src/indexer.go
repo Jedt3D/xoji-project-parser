@@ -12,7 +12,7 @@ func BuildFullIndex(project *Project) (*IndexOutput, error) {
 	codeTree := make(CodeTree)
 	manifest := Manifest{}
 	meta := &MetaFile{
-		Version:   "0.1.0",
+		Version:   Version,
 		IndexedAt: time.Now().UTC().Format("2006-01-02T15:04:05Z"),
 		Files:     make(map[string]FileMeta),
 	}
