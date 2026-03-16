@@ -18,8 +18,7 @@ func BuildFullIndex(project *Project) (*IndexOutput, error) {
 	}
 
 	// Compute project hash
-	projectPath := filepath.Join(project.RootPath, filepath.Base(project.RootPath)) + ".xojo_project"
-	hash, err := computeProjectHash(projectPath)
+	hash, err := computeProjectHash(project.ProjectFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compute project hash: %w", err)
 	}

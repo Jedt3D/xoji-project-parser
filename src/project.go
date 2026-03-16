@@ -53,9 +53,10 @@ func ParseXojoProject(filePath string) (*Project, error) {
 
 	rootPath := filepath.Dir(filePath)
 	project := &Project{
-		RootPath:  rootPath,
-		Items:     []ProjectItem{},
-		IndexPath: filepath.Join(rootPath, ".xojo_index"),
+		RootPath:    rootPath,
+		ProjectFile: filePath,
+		Items:       []ProjectItem{},
+		IndexPath:   filepath.Join(rootPath, ".xojo_index"),
 	}
 
 	scanner := bufio.NewScanner(file)

@@ -91,7 +91,8 @@ type IndexOutput struct {
 
 // Project holds all project-level data needed during indexing
 type Project struct {
-	RootPath  string
-	Items     []ProjectItem
-	IndexPath string // .xojo_index directory path
+	RootPath       string
+	ProjectFile    string // Path to .xojo_project file
+	Items          []ProjectItem
+	IndexPath      string // .xojo_index directory path
 }
