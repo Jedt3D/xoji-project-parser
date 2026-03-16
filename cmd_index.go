@@ -16,6 +16,21 @@ func CmdIndex(projectPath, filePath string) error {
 		if err != nil {
 			return err
 		}
+	} else {
+		// Check if projectPath is a directory or a file
+		fi, err := os.Stat(projectPath)
+		if err != nil {
+			return fmt.Errorf("invalid project path: %w", err)
+		}
+
+		// If it's a directory, search for .xojo_project in it
+		if fi.IsDir() {
+			var err error
+			projectPath, err = FindXojoProject(projectPath)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	// Parse the project

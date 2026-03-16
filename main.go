@@ -38,6 +38,11 @@ func runIndex() {
 
 	fs.Parse(os.Args[2:])
 
+	// If projectPath not provided via flag, use first positional argument
+	if *projectPath == "" && fs.NArg() > 0 {
+		*projectPath = fs.Arg(0)
+	}
+
 	if err := CmdIndex(*projectPath, *filePath); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
@@ -49,6 +54,11 @@ func runCheck() {
 	projectPath := fs.String("project", "", "Path to .xojo_project file (default: search from current dir)")
 
 	fs.Parse(os.Args[2:])
+
+	// If projectPath not provided via flag, use first positional argument
+	if *projectPath == "" && fs.NArg() > 0 {
+		*projectPath = fs.Arg(0)
+	}
 
 	fresh, err := CmdCheck(*projectPath)
 	if err != nil {
@@ -66,6 +76,11 @@ func runServe() {
 	projectPath := fs.String("project", "", "Path to .xojo_project file (default: search from current dir)")
 
 	fs.Parse(os.Args[2:])
+
+	// If projectPath not provided via flag, use first positional argument
+	if *projectPath == "" && fs.NArg() > 0 {
+		*projectPath = fs.Arg(0)
+	}
 
 	if err := CmdServe(*projectPath); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
