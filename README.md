@@ -82,11 +82,32 @@ xoji check  # Verify freshness (exit 0=fresh, 1=stale)
 ## Commands
 
 ```bash
-xoji setup [PATH]           # Configure project for indexing
-xoji index [PATH]           # Build or rebuild all indexes
-xoji index --file PATH      # Incremental: re-index single file
-xoji check [PATH]           # Check if indexes are fresh
-xoji serve [PATH]           # Watch mode (auto re-index) [TODO]
+xoji setup [PATH]                 # Configure project for indexing
+xoji index [PATH]                 # Build or rebuild all indexes
+xoji index --file PATH            # Incremental: re-index single file (<100ms)
+xoji check [PATH]                 # Check if indexes are fresh (exit 0|1)
+xoji serve [PATH]                 # Watch mode (auto re-index) [TODO]
+xoji -h, --help                   # Show detailed help
+xoji -v, --version                # Show version
+```
+
+### Practical Examples
+
+```bash
+# Setup a new project (one time)
+xoji setup ../my_xojo_project
+
+# Build all indexes
+xoji index
+
+# Check if indexes are fresh, rebuild if stale
+xoji check || xoji index
+
+# Incremental update (very fast)
+xoji index --file AppSrc/MainWindow.xojo_window
+
+# Use in CI/CD pipeline
+xoji check || { echo "Stale indexes"; exit 1; }
 ```
 
 ---
